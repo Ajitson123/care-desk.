@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Register hospital' if mode == 'signup' else 'Hospital sign in' }} | care.desk{% endblock %}
+{% block main_class %}auth-page{% endblock %}
+{% block content %}
+<section class="auth-layout">
+    <div class="auth-copy"><p class="eyebrow">HOSPITAL TEAM ACCESS</p><h1>{{ 'Set up your hospital' if mode == 'signup' else 'Welcome back' }}</h1><p class="lede">{{ 'Create a workspace for your departments, doctors, and OPD schedules.' if mode == 'signup' else 'Hospital admins and doctors use their work account to sign in.' }}</p>{% if mode == 'signup' %}<p class="form-footnote">Start with a free 30-day trial.</p>{% endif %}</div>
+    <form class="form-panel auth-form" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if mode == 'signup' %}
+            <label>Hospital name<input name="hospital_name" autocomplete="organization" maxlength="120" required></label>
+            <label>Existing workspace setup code <span class="form-footnote">Only needed if the platform owner asks you to claim existing hospital records.</span><input name="claim_code" autocomplete="one-time-code"></label>
+        {% endif %}
+        <label>Work email<input name="email" type="email" autocomplete="username" required></label>
+        <label>Password<input name="password" type="password" autocomplete="{{ 'new-password' if mode == 'signup' else 'current-password' }}" minlength="{{ 10 if mode == 'signup' else 1 }}" required></label>
+        <button class="button button-primary button-wide" type="submit">{{ 'Create hospital workspace' if mode == 'signup' else 'Sign in' }}</button>
+        <p class="auth-switch">{% if mode == 'signup' %}Already registered? <a href="{{ url_for('hospital_login') }}">Sign in</a>{% else %}New hospital? <a href="{{ url_for('hospital_signup') }}">Register your workspace</a>{% endif %}</p>
+    </form>
+</section>
+{% endblock %}

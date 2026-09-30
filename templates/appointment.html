@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Patient booking | care.desk{% endblock %}
+{% block head %}<script src="{{ url_for('static', filename='patient-booking.js') }}" defer></script>{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">PATIENT BOOKING</p><h1>Book your visit</h1><p class="lede">Choose a hospital and an open appointment time.</p></section>
+{% if hospitals %}
+<form class="form-panel booking-form" method="post" action="{{ url_for('appointment') }}" data-booking-form>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-section-heading"><span>01</span><h2>Your details</h2></div>
+    <div class="field-grid two-columns patient-summary">
+        <div><span>Name</span><strong>{{ patient.name }}</strong></div>
+        <div><span>Contact number</span><strong>{{ patient.phone }}</strong></div>
+    </div>
+    <div class="form-section-heading"><span>02</span><h2>Choose your care</h2></div>
+    <div class="field-grid two-columns">
+        <label>Hospital<select id="hospital-choice" name="hospital_id" required><option value="">Select a hospital</option>{% for hospital in hospitals %}<option value="{{ hospital.id }}" data-slug="{{ hospital.slug }}">{{ hospital.name }}</option>{% endfor %}</select></label>
+        <label>Department<select id="department-choice" name="department_id" required disabled><option value="">Choose a hospital first</option></select></label>
+        <label>Doctor<select id="doctor-choice" name="doctor_id" required disabled><option value="">Choose a department first</option></select></label>
+        <label>Appointment date<input id="appointment-date" name="date" type="date" min="{{ today }}" required disabled></label>
+        <label class="time-field">Available time<select id="appointment-time" name="time" required disabled><option value="">Choose a doctor and date first</option></select></label>
+    </div>
+    <p class="form-status" data-slot-status role="status">Select a hospital to see its departments.</p>
+    <div class="form-actions"><button class="button button-primary" type="submit">Confirm appointment <span aria-hidden="true">&#8594;</span></button><span class="form-footnote">Your chosen time is confirmed when you submit.</span></div>
+</form>
+{% else %}
+<section class="empty-state"><p class="eyebrow">NO HOSPITALS LISTED YET</p><h2>Hospital booking is not set up yet.</h2><p>A hospital team can register and add its departments and doctors.</p><a class="button button-primary" href="{{ url_for('hospital_signup') }}">Register a hospital</a></section>
+{% endif %}
+{% endblock %}

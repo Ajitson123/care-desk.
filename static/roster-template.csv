@@ -1,0 +1,3 @@
+department,doctor_name,email,temporary_password,weekday,start_time,end_time,slot_minutes
+Cardiology,Sample Doctor,doctor@example.invalid,ReplaceWithStrongPassword1,Monday,09:00,12:00,30
+Cardiology,Sample Doctor,doctor@example.invalid,ReplaceWithStrongPassword1,Wednesday,10:00,13:00,30

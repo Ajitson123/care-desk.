@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Patient sign up' if mode == 'signup' else 'Patient sign in' }} | care.desk{% endblock %}
+{% block main_class %}auth-page{% endblock %}
+{% block content %}
+<section class="auth-layout">
+    <div class="auth-copy">
+        <p class="eyebrow">PATIENT ACCOUNT</p>
+        <h1>{{ 'Create your patient account' if mode == 'signup' else 'Patient sign in' }}</h1>
+        <p class="lede">{{ 'Use your account to book visits with hospitals on care.desk.' if mode == 'signup' else 'Sign in to continue to appointment booking.' }}</p>
+    </div>
+    <form class="form-panel auth-form" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if mode == 'signup' %}
+            <label>Full name<input name="name" autocomplete="name" maxlength="120" required></label>
+            <label>Contact number<input name="phone" type="tel" autocomplete="tel" maxlength="40" required></label>
+        {% endif %}
+        <label>Email<input name="email" type="email" autocomplete="username" required></label>
+        <label>Password<input name="password" type="password" autocomplete="{{ 'new-password' if mode == 'signup' else 'current-password' }}" minlength="{{ 10 if mode == 'signup' else 1 }}" required></label>
+        <button class="button button-primary button-wide" type="submit">{{ 'Create patient account' if mode == 'signup' else 'Sign in' }}</button>
+        <p class="auth-switch">{% if mode == 'signup' %}Already registered? <a href="{{ url_for('patient_login') }}">Sign in</a>{% else %}New to care.desk? <a href="{{ url_for('patient_signup') }}">Sign up as a patient</a>{% endif %}</p>
+    </form>
+</section>
+{% endblock %}

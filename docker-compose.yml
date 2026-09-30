@@ -1,0 +1,19 @@
+services:
+  caredesk:
+    build: .
+    container_name: caredesk-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-replace-with-a-long-random-secret}
+      APP_ENV: ${APP_ENV:-production}
+      HOST: 0.0.0.0
+      PORT: 8000
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      DATABASE_PATH: /data/appointments.db
+    volumes:
+      - app-data:/data
+
+volumes:
+  app-data:

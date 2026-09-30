@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block title %}{{ hospital.name }} dashboard | care.desk{% endblock %}
+{% block content %}
+<section class="dashboard-heading">
+    <div><p class="eyebrow">HOSPITAL WORKSPACE</p><h1>{{ hospital.name }}</h1><p class="lede">Doctors, OPD hours, and patient appointments.</p></div>
+    <a class="button button-outline" href="#manage-team">Manage setup</a>
+</section>
+<div class="flash-list" role="status"><p class="flash{% if not trial_active %} flash-error{% endif %}">{% if trial_active %}Free 30-day trial. Your trial ends {{ trial_end_date }}.{% else %}Your free trial has ended. Existing records remain available; setup changes and new bookings are paused.{% endif %}</p></div>
+
+<section class="metric-grid" aria-label="Hospital appointment summary">
+    <article class="metric-panel"><span class="metric-label">Unique patients</span><strong>{{ total_patients }}</strong><span class="metric-note">By contact number</span></article>
+    <article class="metric-panel"><span class="metric-label">Appointments</span><strong>{{ total_appointments }}</strong><span class="metric-note">All recorded bookings</span></article>
+    <article class="metric-panel metric-accent"><span class="metric-label">Today</span><strong>{{ today_count }}</strong><span class="metric-note">Scheduled appointments</span></article>
+</section>
+
+<section class="dashboard-section" id="manage-team">
+    {% if trial_active %}
+    <div class="section-heading"><div><p class="eyebrow">HOSPITAL SETUP</p><h2>Departments and doctors</h2></div><span class="section-count">{{ departments|length }} departments / {{ doctors|length }} doctors</span></div>
+    <div class="management-grid">
+        <form class="form-panel compact-form" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="add_department">
+            <h3>Add a department</h3><label>Department name<input name="name" placeholder="e.g. Cardiology" maxlength="80" required></label>
+            <button class="button button-primary" type="submit">Add department</button>
+        </form>
+        <form class="form-panel compact-form" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="add_doctor">
+            <h3>Add a doctor</h3>
+            <label>Doctor name<input name="name" autocomplete="name" maxlength="120" required></label>
+            <label>Department<select name="department_id" required {% if not departments %}disabled{% endif %}><option value="">Select a department</option>{% for department in departments %}<option value="{{ department.id }}">{{ department.name }}</option>{% endfor %}</select></label>
+            <label>Doctor sign-in email<input name="email" type="email" autocomplete="email" required></label>
+            <label>Temporary password<input name="password" type="password" minlength="10" autocomplete="new-password" required></label>
+            <button class="button button-primary" type="submit" {% if not departments %}disabled{% endif %}>Add doctor</button>
+            {% if not departments %}<p class="form-footnote">Add a department before adding doctors.</p>{% endif %}
+        </form>
+    </div>
+
+    <div class="management-grid roster-grid">
+        <form class="form-panel compact-form" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="import_roster">
+            <h3>Import a doctor roster</h3>
+            <p class="muted-copy">Upload a UTF-8 CSV with departments, doctor accounts, and weekly OPD blocks. Reuse the same email and temporary password for each doctor's schedule row.</p>
+            <a class="text-link" href="{{ url_for('static', filename='roster-template.csv') }}" download>Download CSV template</a>
+            <label>Roster file<input type="file" name="roster" accept=".csv,text/csv" required></label>
+            <button class="button button-primary" type="submit">Import roster</button>
+            <span class="form-footnote">Maximum 1 MB. Temporary passwords are hashed on import; delete the source CSV after use.</span>
+        </form>
+    </div>
+
+    {% if doctors %}
+    <div class="management-grid schedule-grid">
+        <form class="form-panel compact-form" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="add_weekly_schedule">
+            <h3>Set regular OPD hours</h3>
+            <label>Doctor<select name="doctor_id" required>{% for doctor in doctors if doctor.active %}<option value="{{ doctor.id }}">{{ doctor.name }}</option>{% endfor %}</select></label>
+            <div class="field-grid two-columns">
+                <label>Weekday<select name="weekday" required>{% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}<option value="{{ loop.index0 }}">{{ day }}</option>{% endfor %}</select></label>
+                <label>Appointment length<select name="slot_minutes"><option value="15">15 min</option><option value="20">20 min</option><option value="30" selected>30 min</option><option value="60">60 min</option></select></label>
+                <label>Starts<input type="time" name="start_time" value="09:00" required></label><label>Ends<input type="time" name="end_time" value="13:00" required></label>
+            </div>
+            <button class="button button-primary" type="submit">Save weekly hours</button>
+        </form>
+        <form class="form-panel compact-form" method="post" data-closed-form>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="set_day_override">
+            <h3>Change one day's OPD</h3>
+            <label>Doctor<select name="doctor_id" required>{% for doctor in doctors if doctor.active %}<option value="{{ doctor.id }}">{{ doctor.name }}</option>{% endfor %}</select></label>
+            <label>Date<input type="date" name="appointment_date" min="{{ today }}" required></label>
+            <p class="form-footnote">Changes affect new bookings only. Contact patients if their confirmed visit is affected.</p>
+            <label class="checkbox-label"><input type="checkbox" name="is_closed" value="1" data-closed-toggle> Mark doctor unavailable for this date</label>
+            <div class="field-grid three-columns" data-hours-fields><label>Starts<input type="time" name="start_time" value="09:00"></label><label>Ends<input type="time" name="end_time" value="13:00"></label><label>Slot<select name="slot_minutes"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="60">60 min</option></select></label></div>
+            <button class="button button-primary" type="submit">Save date change</button>
+        </form>
+    </div>
+    {% endif %}
+    {% else %}<div class="empty-state small-empty"><h3>Workspace is read-only</h3><p>Your existing records remain available. Setup changes are paused after the free trial.</p></div>{% endif %}
+</section>
+
+<section class="dashboard-section">
+    <div class="section-heading"><div><p class="eyebrow">TEAM DIRECTORY</p><h2>Doctors and weekly OPD</h2></div></div>
+    {% if doctors %}
+        <div class="table-wrap"><table><thead><tr><th>Doctor</th><th>Department</th><th>Weekly OPD</th><th>Status</th><th>Account</th></tr></thead><tbody>
+        {% for doctor in doctors %}<tr>
+            <td><strong>{{ doctor.name }}</strong><br><span class="table-subtext">{{ doctor.email }}</span></td><td>{{ doctor.department_name }}</td>
+            <td>{% set doctor_hours = schedules|selectattr('doctor_id', 'equalto', doctor.id)|list %}{% if doctor_hours %}{% for item in doctor_hours %}<span class="schedule-line">{{ ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][item.weekday] }} {{ item.start_time }}–{{ item.end_time }}</span>{% endfor %}{% else %}<span class="table-subtext">Hours not set</span>{% endif %}</td>
+            <td>{% if doctor.active %}<span class="status status-active">Active</span>{% else %}<span class="status">Inactive</span>{% endif %}</td>
+            <td>{% if doctor.active and trial_active %}<form method="post" class="table-action-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="deactivate_doctor"><input type="hidden" name="doctor_id" value="{{ doctor.id }}"><button class="button button-outline button-small" type="submit">Deactivate</button></form>{% elif doctor.active %}<span class="table-subtext">Read-only</span>{% else %}—{% endif %}</td>
+        </tr>{% endfor %}
+        </tbody></table></div>
+    {% else %}<div class="empty-state small-empty"><h3>No doctors added yet</h3><p>Add a department and doctor, then set regular OPD hours.</p></div>{% endif %}
+</section>
+
+{% if overrides %}<section class="dashboard-section"><div class="section-heading"><div><p class="eyebrow">DATE OVERRIDES</p><h2>Upcoming OPD changes</h2></div></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Doctor</th><th>Hours</th></tr></thead><tbody>{% for item in overrides %}<tr><td>{{ item.appointment_date }}</td><td>{{ item.doctor_name }}</td><td>{% if item.is_closed %}<span class="status status-closed">Unavailable</span>{% else %}{{ item.start_time }}–{{ item.end_time }}{% endif %}</td></tr>{% endfor %}</tbody></table></div></section>{% endif %}
+
+<section class="dashboard-section">
+    <div class="section-heading"><div><p class="eyebrow">PATIENT SCHEDULE</p><h2>Appointments</h2></div><span class="section-count">Showing up to 200 records</span></div>
+    {% if appointments %}<div class="table-wrap"><table><thead><tr><th>Patient</th><th>Department / doctor</th><th>Date</th><th>Time</th><th>Confirmation</th></tr></thead><tbody>
+        {% for appointment in appointments %}<tr><td><strong>{{ appointment.name }}</strong><br><span class="table-subtext">{{ appointment.phone }}</span></td><td>{{ appointment.department }}<br><span class="table-subtext">{{ appointment.doctor_name }}</span></td><td>{{ appointment.date }}</td><td>{{ appointment.time }}</td><td>{{ appointment.confirmation_code or 'Legacy booking' }}</td></tr>{% endfor %}
+    </tbody></table></div>{% else %}<div class="empty-state small-empty"><h3>No appointments yet</h3><p>Patient bookings for {{ hospital.name }} will appear here.</p></div>{% endif %}
+</section>
+{% endblock %}

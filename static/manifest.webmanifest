@@ -1,0 +1,31 @@
+{
+  "id": "/",
+  "name": "care.desk Hospital Appointments",
+  "short_name": "care.desk",
+  "description": "Simple patient booking and hospital OPD scheduling.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f7f3",
+  "theme_color": "#193b32",
+  "icons": [
+    {
+      "src": "/static/hospital-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/hospital-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/hospital-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

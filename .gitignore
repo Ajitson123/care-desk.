@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+appointments.db
+appointments.db-shm
+appointments.db-wal

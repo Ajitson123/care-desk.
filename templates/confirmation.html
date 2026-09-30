@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Appointment confirmed | care.desk{% endblock %}
+{% block main_class %}confirmation-page{% endblock %}
+{% block content %}
+<section class="confirmation-panel"><p class="eyebrow">BOOKING CONFIRMED</p><h1>You're on the schedule.</h1><p class="lede">{{ appointment.hospital_name }}</p>
+    <dl class="confirmation-details"><div><dt>Patient</dt><dd>{{ appointment.name }}</dd></div><div><dt>Department</dt><dd>{{ appointment.department }}</dd></div><div><dt>Doctor</dt><dd>{{ appointment.doctor_name }}</dd></div><div><dt>Date and time</dt><dd>{{ appointment.date }} at {{ appointment.time }}</dd></div><div><dt>Confirmation code</dt><dd class="code-value">{{ code }}</dd></div></dl>
+    <a class="button button-primary" href="{{ url_for('appointment') }}">Book another appointment</a>
+</section>
+{% endblock %}

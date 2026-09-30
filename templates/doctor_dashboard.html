@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Doctor OPD | care.desk{% endblock %}
+{% block content %}
+<section class="dashboard-heading"><div><p class="eyebrow">DOCTOR WORKSPACE / {{ doctor.hospital_name }}</p><h1>Dr. {{ doctor.name }}</h1><p class="lede">{{ doctor.department_name }} · Manage your OPD for a specific date.</p></div></section>
+<div class="flash-list" role="status"><p class="flash{% if not trial_active %} flash-error{% endif %}">{% if trial_active %}Hospital free trial is active.{% else %}Hospital free trial ended. Existing appointments remain visible; OPD changes and new bookings are paused.{% endif %}</p></div>
+<section class="doctor-layout">
+    <div class="dashboard-section doctor-hours"><div class="section-heading"><div><p class="eyebrow">REGULAR HOURS</p><h2>Weekly OPD</h2></div></div>
+        {% if schedules %}<div class="hours-list">{% for item in schedules %}<div><strong>{{ ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][item.weekday] }}</strong><span>{{ item.start_time }}–{{ item.end_time }}</span><small>{{ item.slot_minutes }} minute visits</small></div>{% endfor %}</div>{% else %}<p class="muted-copy">Your hospital team has not set recurring hours yet.</p>{% endif %}
+    </div>
+    {% if trial_active %}<form class="form-panel compact-form override-form" method="post" data-closed-form><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><h2>Change a date's OPD</h2><p class="muted-copy">This date-specific change takes priority over your weekly hours. Existing bookings stay unchanged; contact affected patients directly.</p>
+        <label>Date<input type="date" name="appointment_date" min="{{ today }}" required></label>
+        <label class="checkbox-label"><input type="checkbox" name="is_closed" value="1" data-closed-toggle> Mark me unavailable for this date</label>
+        <div class="field-grid three-columns" data-hours-fields><label>Starts<input type="time" name="start_time" value="09:00"></label><label>Ends<input type="time" name="end_time" value="13:00"></label><label>Visit length<select name="slot_minutes"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="60">60 min</option></select></label></div>
+        <button class="button button-primary" type="submit">Update my OPD</button>
+    </form>{% else %}<div class="empty-state small-empty"><h3>Workspace is read-only</h3><p>OPD changes are paused after the hospital free trial.</p></div>{% endif %}
+</section>
+<section class="dashboard-section"><div class="section-heading"><div><p class="eyebrow">YOUR PATIENTS</p><h2>Upcoming appointments</h2></div></div>
+    {% if appointments %}<div class="table-wrap"><table><thead><tr><th>Patient</th><th>Department</th><th>Date</th><th>Time</th></tr></thead><tbody>{% for appointment in appointments %}<tr><td>{{ appointment.name }}</td><td>{{ appointment.department }}</td><td>{{ appointment.date }}</td><td>{{ appointment.time }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state small-empty"><h3>Your upcoming visits will appear here</h3></div>{% endif %}
+</section>
+{% if overrides %}<section class="dashboard-section"><div class="section-heading"><div><p class="eyebrow">YOUR DATE CHANGES</p><h2>Upcoming OPD overrides</h2></div></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Availability</th></tr></thead><tbody>{% for item in overrides %}<tr><td>{{ item.appointment_date }}</td><td>{% if item.is_closed %}Unavailable{% else %}{{ item.start_time }}–{{ item.end_time }}{% endif %}</td></tr>{% endfor %}</tbody></table></div></section>{% endif %}
+{% endblock %}

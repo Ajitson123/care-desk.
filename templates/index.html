@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}care.desk | Choose a portal{% endblock %}
+{% block main_class %}portal-page{% endblock %}
+{% block content %}
+<section class="portal-intro">
+    <p class="eyebrow">CARE.DESK PLATFORM</p>
+    <h1>Where would you like to go?</h1>
+    <p class="lede">Appointments made clearer for patients and care teams.</p>
+</section>
+<section class="portal-grid" aria-label="Choose a portal">
+    <article class="portal-panel patient-panel">
+        <span class="portal-kicker">01 / PATIENTS</span>
+        <h2>Find a doctor.<br>Book a visit.</h2>
+        <p>Choose a hospital, department, doctor, and an available time.</p>
+        <div class="button-row">
+            <a class="button button-light" href="{{ url_for('patient_signup') }}">Sign up as a patient <span aria-hidden="true">&#8594;</span></a>
+            <a class="text-link" href="{{ url_for('patient_login') }}">Already registered? Sign in</a>
+        </div>
+    </article>
+    <article class="portal-panel hospital-panel">
+        <span class="portal-kicker">02 / HOSPITAL TEAMS</span>
+        <h2>Run your<br>OPD schedule.</h2>
+        <p>Manage departments, doctors, weekly hours, and daily changes.</p>
+        <div class="button-row">
+            <a class="button button-dark" href="{{ url_for('hospital_login') }}">Hospital sign in</a>
+            <a class="text-link" href="{{ url_for('hospital_signup') }}">Register hospital</a>
+        </div>
+    </article>
+</section>
+<p class="portal-note">Hospital accounts keep their doctors, schedules, and appointments separate.</p>
+{% endblock %}
